@@ -31,6 +31,9 @@ describe "Phalange", ->
         field = $('.phalange-form input')
         expect(field.val()).toEqual "Original Content"
 
+      it "pre-selects the form element", ->
+        expect(document.activeElement).toEqual(document.querySelector('.phalange-form input'))
+
     describe "when submitted", ->
       originalText = null
 

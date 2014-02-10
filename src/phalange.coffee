@@ -8,14 +8,16 @@ class Phalange extends Backbone.View
 
   events:
     "click": "append"
-    "submit": "submit"
-    "blur input": "submit"
+    "submit": "hideForm"
+    "focusout": "submit"
 
   submit: ->
-    @text = @_input().val()
-    @$el.trigger 'phalange:submit', @text
-    @hideForm()
+    new_val = @_input().val()
+    unless @text is new_val
+      @text = new_val
+      @$el.trigger 'phalange:submit', @text
     @setText()
+    @hideForm()
 
   setText: ->
     @$el.text @_input().val()
@@ -24,8 +26,10 @@ class Phalange extends Backbone.View
     @_phalange().hide()
 
   append: ->
-    @$el.text ''
-    @$el.append @_$form() unless @_phalange_present()
+    unless @_phalange_present()
+      @$el.text ''
+      @$el.append @_$form()
+      @_input().focus()
 
   _phalange_present: ->
     @_phalange().length is 1
