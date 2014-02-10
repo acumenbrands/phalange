@@ -9,7 +9,7 @@ class Phalange extends Backbone.View
   events:
     "click": "append"
     "submit": "submit"
-    "blur": "submit"
+    "blur input": "submit"
 
   submit: ->
     @text = @_input().val()
@@ -45,4 +45,7 @@ class Phalange extends Backbone.View
     """
     $(template)
 
-module?.exports = Phalange
+if module?
+  module.exports = Phalange
+else
+  window.Phalange = Phalange
