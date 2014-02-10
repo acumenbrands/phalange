@@ -34,7 +34,7 @@ describe "Phalange", ->
       it "pre-selects the form element", ->
         expect(document.activeElement).toEqual(document.querySelector('.phalange-form input'))
 
-    describe "when submitted", ->
+    describe "on focus out", ->
       originalText = null
 
       beforeEach ->
@@ -51,9 +51,19 @@ describe "Phalange", ->
         $el.on 'phalange:submit', Testable.stub
 
         $el.find("input").val("New Value")
-        $('.phalange-form').trigger 'submit'
+        $('.phalange-form').trigger 'focusout'
 
         expect(spy).toHaveBeenCalled()
+
+      it "populates the element with the submitted text", ->
+        $el.find("input").val("New Text")
+        $('.phalange-form').trigger 'focusout'
+
+        expect($el.text()).toEqual "New Text"
+
+    describe "submit", ->
+      beforeEach ->
+        $el.click()
 
       it "hides the form", ->
         $form = $('.phalange-form')
@@ -61,8 +71,3 @@ describe "Phalange", ->
 
         expect($form.css 'display' ).toEqual 'none'
 
-      it "populates the element with the submitted text", ->
-        $el.find("input").val("New Text")
-        $('.phalange-form').trigger 'submit'
-
-        expect($el.text()).toEqual "New Text"
