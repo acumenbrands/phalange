@@ -1,22 +1,31 @@
 Phalange = {}
 
+Phalange.EventBus = $.extend {}, Backbone.Events
+
 class Phalange.Form extends Backbone.View
-  tagName: 'form'
-  className: 'phalange-form'
+  initialize: ->
+    @el.action = 'javascript:void(0)'
+    Phalange.EventBus.on 'appended', @display
+
   events:
     "focusout": "hide"
     "submit": "hide"
 
-  hide: -> @$el.hide()
+  tagName: 'form'
+  className: 'phalange-form'
+
+  hide: => @$el.hide()
+  display: => @$el.css display: 'block'
 
 class Phalange.Input extends Backbone.View
-  initialize: ({@text, @$container}) ->
+  initialize: ({@text, @$container, @$form}) ->
     @$el.val @text
-    @$container.on "click", @focus.bind @
+    Phalange.EventBus.on "appended", @focus
 
+  className: 'phalange-input'
   tagName: 'input'
 
-  focus: -> @$el.focus()
+  focus: => @$el.focus()
   val: -> @$el.val()
 
 class Phalange.Container extends Backbone.View
@@ -28,7 +37,7 @@ class Phalange.Container extends Backbone.View
     "click": "append"
     "focusout": "submit"
 
-  submit: ->
+  submit: (e) ->
     @setText()
     userInput = @formBuilder().input()
 
@@ -40,9 +49,11 @@ class Phalange.Container extends Backbone.View
     @$el.text @formBuilder().input()
 
   append: ->
-    unless @formBuilder().isPresentIn @$el
-      @$el.text ''
-      @$el.append @$form()
+    @$el.text ''
+    @$el.append @$form()
+    # @$form().css display: 'block'
+    # @$form().find('input').focus()
+    Phalange.EventBus.trigger "appended"
 
   formBuilder: ->
     @__builder ?= new Phalange.FormBuilder @text, @$el
@@ -51,7 +62,7 @@ class Phalange.Container extends Backbone.View
     @formBuilder().$el()
 
 class Phalange.FormBuilder
-  constructor: (@text, @$container) ->
+  constructor: (@text, @container) ->
     @_form().$el.append @_input().$el
 
   input: ->
@@ -60,20 +71,20 @@ class Phalange.FormBuilder
   $el: ->
     @_form().$el
 
-  isPresentIn: ($el) ->
-    _.include $el.children(), @_form().$el
-
   _form: ->
     @__form ?= new Phalange.Form()
 
   _input: ->
-    @__input ?= new Phalange.Input text: @text, $container: @$container
+    @__input ?= new Phalange.Input
+      text: @text
+      $container: @$container
+      $form: @_form().$el
 
 if module?
   module.exports = Phalange
 else
   window.Phalange = Phalange
 
-$.fn.edit = ->
+jQuery.fn.edit = $.fn.edit = ->
   form = new Phalange.Container( el: @ )
   @
